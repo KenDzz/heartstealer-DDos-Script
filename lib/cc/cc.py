@@ -1,4 +1,3 @@
-import requests
 import socket
 import socks
 import time
@@ -661,12 +660,14 @@ def main():
 		th.setDaemon(True)
 		th.start()
 	else:
-		multiple = str(input("	[+] Input the Magnification(default=100):"))
+		# multiple = str(input("	[+] Input the Magnification(default=100):"))
+		multiple = "100"
 		if multiple == "":
 			multiple = int(100)
 		else:
 			multiple = int(multiple)
-		brute = str(input("	[+] Enable boost mode[beta](y/n, default=n):"))
+		# brute = str(input("	[+] Enable boost mode[beta](y/n, default=n):"))
+		brute = "n"
 		if brute == "":
 			brute = False
 		elif brute == "y":
