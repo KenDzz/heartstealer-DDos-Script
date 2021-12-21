@@ -293,6 +293,7 @@ def cc(event,socks_type,ind_rlock):
 		except:
 			s.close()
 
+nums = 0
 def checking(lines,socks_type,ms,rlock,):
 	global nums
 	global proxies
