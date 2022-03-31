@@ -8,7 +8,7 @@
    cd heartstealer-Dos-Script/
    ```
    ```
-   pip install -r requirement.txt
+   pip install -r requirements.txt
    ```
    ```
    perl heartstealer.pl
